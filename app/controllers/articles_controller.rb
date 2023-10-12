@@ -2,7 +2,13 @@ class ArticlesController < ApplicationController
   before_action :set_article, only: [:show, :update, :destroy]
   def index
      @articles = Article.all
-     render json: @articles, status: :ok
+     
+      if @articles.present?
+       render json: @articles, status: :ok
+
+      else
+       render json: {message: "not found"}, status: :not_found
+      end
    end
    def show
      render json: @article
@@ -24,11 +30,15 @@ class ArticlesController < ApplicationController
    end
    def destroy
      @article.destroy
+     render json: {message: "Sucessfully destroyed"}, status: :ok
    end
    private
-     def set_article
-       @article = Article.find(params[:id])
-     end
+   def set_article
+    @article = Article.find_by_id(params[:id])
+    unless @article.present?
+      render json: {message: "not found"}, status: :not_found
+    end
+  end
      def article_params
        params.require(:article).permit(:name, :body)
      end
