@@ -1,7 +1,8 @@
 class ArticlesController < ApplicationController
+  before_action :authorize
   before_action :set_article, only: [:show, :update, :destroy]
   def index
-     @articles = Article.all
+     @articles = @user.articles.all
      
       if @articles.present?
        render json: @articles, status: :ok
@@ -13,14 +14,16 @@ class ArticlesController < ApplicationController
    def show
      render json: @article
    end
+   
    def create
-     @article = Article.new(article_params)
+     @article = Article.new(article_params.merge(user: @user))
      if @article.save
        render json: @article, status: :created
      else
        render json: @article.errors, status: :unprocessable_entity
      end
    end
+
    def update
      if @article.update(article_params)
        render json: @article
@@ -28,16 +31,19 @@ class ArticlesController < ApplicationController
        render json: @article.errors, status: :unprocessable_entity
      end
    end
+
    def destroy
      @article.destroy
      render json: {message: "Sucessfully destroyed"}, status: :ok
    end
+
    private
    def set_article
-    @article = Article.find_by_id(params[:id])
+    @article = @user.articles.find_by_id(params[:id])
     unless @article.present?
       render json: {message: "not found"}, status: :not_found
     end
+
   end
      def article_params
        params.require(:article).permit(:name, :body)

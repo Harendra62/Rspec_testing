@@ -13,4 +13,5 @@ Rails.application.routes.draw do
   # root "articles#index"
   resources :articles
   resources :users
+  post "/login", to: "users#login"
 end
